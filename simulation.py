@@ -1,6 +1,6 @@
 """ FINANCE PART
 
-In this notebook we simulate paths of the german bond rate and spread.
+In this file we simulate paths of the german bond rate and spread.
 They both follow mean reverting OU processes (https://fr.wikipedia.org/wiki/Processus_d%27Ornstein-Uhlenbeck)
 In the calm regime they are independent. A share p_crisis of the paths enters a crisis on a random day:
 the spread jumps, then has a higher mean and volatility, and is negatively correlated with the German rate.

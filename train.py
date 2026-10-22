@@ -1,7 +1,7 @@
 """ OPTIMISATION PART
 
 Trains the hedging network with GD, Adam and Spectral GD over a grid of learning rates, then plots.
-Usage: python train.py 1_crisis   (writes results.json and the figures in that folder)
+Usage: python train.py 1_crisis/p_05 0.05   (folder, crisis probability; writes results.json and the figures there)
 """
 
 import json
@@ -15,16 +15,16 @@ import torch
 
 from simulation import B, N_STEPS, SIGMA_S, S_BAR, bond_prices, cvar, dv01_hedge, oracle_hedge, pnl, simulate
 
-P_CRISIS = 0.05
+P_CRISIS = 0.05     # default, overwritten by the command-line argument
 N_ITER = 1000
 BATCH_SIZE = 1024
 N_TEST = 20_000
 N_TEST_CRISIS = 1000    # second test set, crisis paths only
 EVAL_EVERY = 10
 PATIENCE = 300      # early stopping: stop when the test loss has not improved for 300 steps
-LEARNING_RATES = {"GD": [1e-3, 1e-2, 1e-1, 1],
+LEARNING_RATES = {"GD": [1e-3, 1e-2, 1e-1],
                   "Adam": [1e-4, 1e-3, 1e-2, 1e-1],
-                  "Spectral": [1e-3, 1e-2, 1e-1, 1]}
+                  "Spectral": [1e-3, 1e-2, 1e-1]}
 
 
 def inputs(r, s, vol):
@@ -124,8 +124,10 @@ def draw_references(ax, references):
 
 
 def plot(results, references, folder):
-    """references[test_set] = {label: CVaR of a reference hedge}, test_set in "all", "crisis"."""
-    for test_set, suffix in [("all", ""), ("crisis", "_crisis")]:
+    """references[test_set] = {label: CVaR of a reference hedge}, test_set in "all", "crisis".
+    The lr = 1 runs are not drawn (they always diverge or stay far above the others)."""
+    results = {name: {lr: c for lr, c in curves.items() if lr != 1} for name, curves in results.items()}
+    for test_set, suffix in [("all", ""), ("crisis", "_crisis_only")]:
         if test_set not in references:
             continue
         fig, ax = plt.subplots(figsize=(6, 4))
@@ -157,6 +159,9 @@ def reference_cvars(paths):
 
 def main():
     folder = Path(sys.argv[1])
+    folder.mkdir(parents=True, exist_ok=True)
+    global P_CRISIS
+    P_CRISIS = float(sys.argv[2])
     test = simulate(N_TEST, np.random.default_rng(12345), P_CRISIS)
     test_crisis = simulate(N_TEST_CRISIS, np.random.default_rng(54321), 1.0)
     references = {"all": reference_cvars(test), "crisis": reference_cvars(test_crisis)}

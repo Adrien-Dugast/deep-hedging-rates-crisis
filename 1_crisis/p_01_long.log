@@ -1,0 +1,5 @@
+Reference CVaRs: {'all': {'duration hedge (ignores the crisis)': 1.064554214477539, 'oracle (knows the regime, min variance)': 1.0477112531661987}, 'crisis': {'duration hedge (ignores the crisis)': 5.0474324226379395, 'oracle (knows the regime, min variance)': 4.441802501678467}}
+Share of crisis paths in the 5% worst (duration hedge): 16%
+GD lr=0.001: best CVaR 1.0512, stopped at step 2000 (74 s)
+Adam lr=0.0001: best CVaR 1.0427, stopped at step 2000 (83 s)
+Spectral lr=0.001: best CVaR 1.0376, stopped at step 2000 (82 s)
